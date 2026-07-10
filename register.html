@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>注册 · 代码雨</title>
+    <!-- Favicon 与主页保持一致 -->
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+    <style>
+        /* 全局重置 + 全屏 canvas */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #0b0d15;
+            overflow: hidden;
+            font-family: 'Segoe UI', 'PingFang SC', Roboto, 'Helvetica Neue', sans-serif;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        #matrixCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 0;
+            display: block;
+            background: #0b0d15;
+        }
+
+        /* ===== 返回首页链接（左上角） ===== */
+        .back-home {
+            position: fixed;
+            top: 24px;
+            left: 32px;
+            z-index: 20;
+            color: rgba(255, 255, 255, 0.4);
+            text-decoration: none;
+            font-size: 0.9rem;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            padding: 8px 18px;
+            border-radius: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .back-home:hover {
+            color: rgba(255, 255, 255, 0.85);
+            border-color: rgba(255, 255, 255, 0.15);
+            background: rgba(255, 255, 255, 0.06);
+            transform: translateX(-4px);
+        }
+
+        /* ===== 注册表单容器 ===== */
+        .register-wrapper {
+            position: relative;
+            z-index: 10;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            pointer-events: none;
+            padding: 1.5rem;
+        }
+
+        .register-card {
+            pointer-events: auto;
+            width: 100%;
+            max-width: 420px;
+            padding: 2.8rem 2.5rem 2.5rem;
+            border-radius: 3rem;
+            background: rgba(10, 14, 23, 0.65);
+            backdrop-filter: blur(12px) saturate(180%);
+            -webkit-backdrop-filter: blur(12px) saturate(180%);
+            box-shadow: 0 40px 80px -20px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(0, 255, 100, 0.06);
+            border: 1px solid rgba(0, 255, 100, 0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .register-card:hover {
+            box-shadow: 0 50px 100px -20px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(0, 255, 100, 0.12);
+        }
+
+        .register-title {
+            text-align: center;
+            font-size: 2rem;
+            font-weight: 700;
+            letter-spacing: 0.03em;
+            margin-bottom: 0.4rem;
+            background: linear-gradient(135deg, #8ed6b0, #6fc3df, #bb7bdb);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .register-subtitle {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.25);
+            font-size: 0.85rem;
+            letter-spacing: 0.2em;
+            margin-bottom: 2rem;
+            font-weight: 300;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            padding-bottom: 1.2rem;
+        }
+
+        /* 表单组 */
+        .form-group {
+            margin-bottom: 1.4rem;
+        }
+
+        .form-group label {
+            display: block;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.8rem;
+            font-weight: 500;
+            letter-spacing: 0.08em;
+            margin-bottom: 0.4rem;
+            text-transform: uppercase;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 18px;
+            border-radius: 60px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            background: rgba(255, 255, 255, 0.04);
+            color: rgba(255, 255, 255, 0.85);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            outline: none;
+            font-family: inherit;
+        }
+
+        .form-group input::placeholder {
+            color: rgba(255, 255, 255, 0.15);
+            font-weight: 300;
+        }
+
+        .form-group input:focus {
+            border-color: rgba(0, 255, 120, 0.25);
+            background: rgba(255, 255, 255, 0.07);
+            box-shadow: 0 0 30px rgba(0, 255, 120, 0.03), inset 0 0 20px rgba(0, 255, 120, 0.02);
+        }
+
+        .form-group input:focus-visible {
+            outline: none;
+        }
+
+        /* 注册按钮 */
+        .btn-register-submit {
+            width: 100%;
+            padding: 14px;
+            border-radius: 60px;
+            border: none;
+            font-size: 1.05rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 0.5rem;
+            background: linear-gradient(135deg, rgba(0, 255, 120, 0.15), rgba(100, 180, 255, 0.12));
+            color: rgba(0, 255, 150, 0.85);
+            border: 1px solid rgba(0, 255, 120, 0.15);
+            text-transform: uppercase;
+        }
+
+        .btn-register-submit:hover {
+            transform: translateY(-2px);
+            background: linear-gradient(135deg, rgba(0, 255, 120, 0.25), rgba(100, 180, 255, 0.20));
+            border-color: rgba(0, 255, 120, 0.30);
+            color: #8affc0;
+            box-shadow: 0 12px 40px -12px rgba(0, 255, 120, 0.15);
+        }
+
+        .btn-register-submit:active {
+            transform: translateY(0px) scale(0.97);
+        }
+
+        /* 已有账号跳转 */
+        .login-link {
+            text-align: center;
+            margin-top: 1.5rem;
+            color: rgba(255, 255, 255, 0.2);
+            font-size: 0.85rem;
+        }
+
+        .login-link a {
+            color: rgba(0, 255, 150, 0.5);
+            text-decoration: none;
+            transition: color 0.3s ease;
+            font-weight: 500;
+        }
+
+        .login-link a:hover {
+            color: rgba(0, 255, 150, 0.85);
+            text-decoration: underline;
+        }
+
+        /* ===== 响应式 ===== */
+        @media (max-width: 480px) {
+            .back-home {
+                top: 16px;
+                left: 16px;
+                font-size: 0.75rem;
+                padding: 6px 14px;
+            }
+
+            .register-card {
+                padding: 2rem 1.5rem 1.8rem;
+                border-radius: 2rem;
+            }
+
+            .register-title {
+                font-size: 1.6rem;
+            }
+
+            .form-group input {
+                padding: 10px 16px;
+                font-size: 0.9rem;
+            }
+
+            .btn-register-submit {
+                padding: 12px;
+                font-size: 0.95rem;
+            }
+        }
+
+        @media (max-width: 380px) {
+            .register-card {
+                padding: 1.5rem 1rem 1.5rem;
+                border-radius: 1.5rem;
+            }
+
+            .register-title {
+                font-size: 1.3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ===== 左上角返回首页 ===== -->
+    <a href="/" class="back-home">← 返回首页</a>
+
+    <!-- Canvas 代码雨背景 -->
+    <canvas id="matrixCanvas"></canvas>
+
+    <!-- ===== 注册表单 ===== -->
+    <div class="register-wrapper">
+        <div class="register-card">
+            <h1 class="register-title">📝 注册</h1>
+            <p class="register-subtitle">创建你的专属账号</p>
+
+            <form id="registerForm" action="/reg" method="GET">
+                <!-- 用户名 -->
+                <div class="form-group">
+                    <label for="username">用户名</label>
+                    <input type="text" id="username" name="username" placeholder="输入用户名" required autocomplete="username">
+                </div>
+
+                <!-- 邮箱 -->
+                <div class="form-group">
+                    <label for="email">邮箱</label>
+                    <input type="email" id="email" name="email" placeholder="输入邮箱地址" required autocomplete="email">
+                </div>
+
+                <!-- 密码 -->
+                <div class="form-group">
+                    <label for="password">密码</label>
+                    <input type="password" id="password" name="password" placeholder="至少 6 位" required minlength="6" autocomplete="new-password">
+                </div>
+
+                <!-- 确认密码 -->
+                <div class="form-group">
+                    <label for="confirmPassword">确认密码</label>
+                    <input type="password" id="confirmPassword" name="confirmPassword" placeholder="再次输入密码" required minlength="6" autocomplete="new-password">
+                </div>
+
+                <!-- 提交按钮 -->
+                <button type="submit" class="btn-register-submit">注 册</button>
+            </form>
+
+            <div class="login-link">
+                已有账号？ <a href="/login.html">去登录</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== 代码雨脚本 ===== -->
+    <script>
+        (function() {
+            const canvas = document.getElementById('matrixCanvas');
+            const ctx = canvas.getContext('2d');
+
+            let width = window.innerWidth;
+            let height = window.innerHeight;
+            canvas.width = width;
+            canvas.height = height;
+
+            const trailLength = 0.04;
+
+            const columnWidth = 18;
+            const fontSize = 20;
+            const columns = Math.floor(width / columnWidth);
+            const drops = [];
+
+            for (let i = 0; i < columns; i++) {
+                drops[i] = -Math.random() * height * 1.5 - 20;
+            }
+
+            const chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzアァカサタナハマヤャラワガザダバパイィキシチニヒミリヰギジヂビピウゥクスツヌフムユュルグズヅブプエェケセテネヘメレヱゲゼデベペオォコソトノホモヨョロヲゴゾドボポヴッン";
+            const charArray = chars.split('');
+
+            function getRandomChar() {
+                return charArray[Math.floor(Math.random() * charArray.length)];
+            }
+
+            function draw() {
+                ctx.fillStyle = `rgba(10, 13, 23, ${trailLength})`;
+                ctx.fillRect(0, 0, width, height);
+
+                ctx.font = fontSize + 'px "Courier New", monospace';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'top';
+
+                for (let i = 0; i < drops.length; i++) {
+                    const x = i * columnWidth + columnWidth / 2;
+                    let y = drops[i];
+                    const char = getRandomChar();
+
+                    let brightness = 0;
+                    if (y > 0) {
+                        brightness = Math.min(1, y / (height * 0.9));
+                    }
+                    brightness = Math.max(0.3, brightness);
+
+                    const green = Math.floor(80 + 175 * brightness);
+                    const red = Math.floor(10 + 40 * brightness);
+                    const blue = Math.floor(20 + 80 * brightness);
+                    ctx.fillStyle = `rgb(${red}, ${green}, ${blue})`;
+
+                    if (y > height * 0.6 && Math.random() < 0.08) {
+                        ctx.fillStyle = `rgba(200, 255, 220, 0.9)`;
+                    }
+
+                    if (y > 0) {
+                        ctx.fillText(char, x, y);
+                    }
+
+                    const speed = 0.8 + Math.random() * 0.7;
+                    drops[i] = y + speed;
+
+                    if (drops[i] > height) {
+                        drops[i] = -Math.random() * height * 0.6 - 30;
+                    }
+                }
+            }
+
+            let animationId = null;
+
+            function animate() {
+                draw();
+                animationId = requestAnimationFrame(animate);
+            }
+            animate();
+
+            let resizeTimeout = null;
+
+            function handleResize() {
+                clearTimeout(resizeTimeout);
+                resizeTimeout = setTimeout(() => {
+                    width = window.innerWidth;
+                    height = window.innerHeight;
+                    canvas.width = width;
+                    canvas.height = height;
+
+                    const newColumns = Math.floor(width / columnWidth);
+                    if (newColumns > drops.length) {
+                        for (let i = drops.length; i < newColumns; i++) {
+                            drops[i] = -Math.random() * height * 1.5 - 20;
+                        }
+                    } else if (newColumns < drops.length) {
+                        drops.length = newColumns;
+                    }
+                }, 120);
+            }
+            window.addEventListener('resize', handleResize);
+
+            window.addEventListener('beforeunload', function() {
+                if (animationId) {
+                    cancelAnimationFrame(animationId);
+                }
+                window.removeEventListener('resize', handleResize);
+            });
+
+            // ===== 表单验证：密码一致 =====
+            const form = document.getElementById('registerForm');
+            const password = document.getElementById('password');
+            const confirmPassword = document.getElementById('confirmPassword');
+
+            form.addEventListener('submit', function(e) {
+                if (password.value !== confirmPassword.value) {
+                    e.preventDefault();
+                    alert('⚠️ 两次输入的密码不一致，请重新输入。');
+                    confirmPassword.focus();
+                    confirmPassword.select();
+                }
+                // 如果一致，表单正常提交，跳转到 /reg?username=xxx&email=xxx&password=xxx
+                // 注意：密码会以明文出现在URL中（GET请求），仅供演示。
+                // 生产环境请务必使用 POST + HTTPS。
+            });
+        })();
+    </script>
+</body>
+</html>
