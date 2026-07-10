@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>彩色占位页</title>
+    <title>你是给</title>
     <style>
-        /* 清除内外边距，让页面铺满视口 */
         * {
             margin: 0;
             padding: 0;
@@ -17,13 +16,12 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            background-color: #0b0d15; /* 深色背景让彩色更突出 */
+            background-color: #0b0d15;
             font-family: 'Segoe UI', 'PingFang SC', Roboto, 'Helvetica Neue', sans-serif;
             padding: 1.5rem;
             margin: 0;
         }
 
-        /* 核心文字容器 ———— 完美的居中 */
         .hero-text {
             text-align: center;
             padding: 2rem 1.5rem;
@@ -39,7 +37,6 @@
             transform: scale(1.02);
         }
 
-        /* 核心彩色文字 ———— 动态渐变 + 额外文字阴影提升质感 */
         .colorful-title {
             font-size: clamp(2.8rem, 15vw, 6rem);
             font-weight: 800;
@@ -65,7 +62,6 @@
             word-break: break-word;
         }
 
-        /* 彩色流动动画 */
         @keyframes gradientShift {
             0% {
                 background-position: 0% 50%;
@@ -78,7 +74,6 @@
             }
         }
 
-        /* 可选小点缀 ———— 增加一点俏皮的装饰线，让页面不空旷 */
         .sub-message {
             margin-top: 1.8rem;
             font-size: clamp(1rem, 2.5vw, 1.4rem);
@@ -102,7 +97,6 @@
             50% { opacity: 0.9; }
         }
 
-        /* 移动端更舒适的边距 */
         @media (max-width: 480px) {
             .hero-text {
                 padding: 1.5rem 1rem;
@@ -120,7 +114,7 @@
         <h1 class="colorful-title">这里暂时什么都没有</h1>
         <!-- 附加一条细微的装饰文字 (完全是可选的，但让页面更生动) -->
         <div class="sub-message">
-            <span>✦ 稍后回来 · 精彩准备中 ✦</span>
+            <span>✦ 你是给！ ✦</span>
         </div>
     </div>
 </body>
