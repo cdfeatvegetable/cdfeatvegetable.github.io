@@ -488,9 +488,18 @@
             showToast('✅ 注册成功！正在跳转...', 'success');
 
             // 7. 延迟跳转到用户中心
-            setTimeout(() => {
-                window.location.href = '/dashboard.html';
-            }, 1200);
+            // 7. 显示成功信息，不跳转
+document.querySelector('.register-card').innerHTML = `
+    <div style="text-align:center;padding:20px 0;">
+        <div style="font-size:4rem;margin-bottom:1rem;">🎉</div>
+        <h2 style="color:rgba(255,255,255,0.9);margin-bottom:0.5rem;">注册成功！</h2>
+        <p style="color:rgba(255,255,255,0.4);margin-bottom:1.5rem;">欢迎你，${username}！</p>
+        <a href="/" class="btn-register-submit" style="text-decoration:none;display:inline-block;padding:12px 40px;">返回首页</a>
+        <div style="margin-top:1rem;">
+            <a href="/login.html" style="color:rgba(0,255,150,0.5);text-decoration:none;">去登录</a>
+        </div>
+    </div>
+`;
         });
     </script>
 </body>
