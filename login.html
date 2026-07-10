@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>登录 · 代码雨</title>
-    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌈</text></svg>">
     <style>
         * {
             margin: 0;
@@ -430,4 +430,30 @@
                 showToast('❌ 用户名或密码错误', 'error');
                 document.getElementById('loginPassword').value = '';
                 document.getElementById('loginPassword').focus();
-               
+                return;
+            }
+
+            // 登录成功：保存当前用户状态
+            localStorage.setItem('currentUser', JSON.stringify({
+                id: user.id,
+                username: user.username,
+                email: user.email
+            }));
+
+            showToast('✅ 登录成功！正在跳转...', 'success');
+
+            setTimeout(() => {
+                window.location.href = '/dashboard.html';
+            }, 1000);
+        });
+
+        // 如果已登录，直接跳转
+        (function checkLogin() {
+            const currentUser = localStorage.getItem('currentUser');
+            if (currentUser) {
+                window.location.href = '/dashboard.html';
+            }
+        })();
+    </script>
+</body>
+</html>
