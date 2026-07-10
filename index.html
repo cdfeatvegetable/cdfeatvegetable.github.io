@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>你是给</title>
+    <title>代码雨 · 彩色占位</title>
     <style>
+        /* 全局重置 + 全屏 canvas */
         * {
             margin: 0;
             padding: 0;
@@ -12,33 +13,60 @@
         }
 
         body {
-            min-height: 100vh;
+            background: #0b0d15;
+            overflow: hidden;          /* 隐藏滚动条，纯全屏背景 */
+            font-family: 'Segoe UI', 'PingFang SC', Roboto, 'Helvetica Neue', sans-serif;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        /* canvas 作为底层背景 ———— 全屏代码雨 */
+        #matrixCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 0;
+            display: block;
+            background: #0b0d15;        /* 深色基底，和代码雨融为一体 */
+        }
+
+        /* 内容层 ———— 完美居中，浮在 canvas 之上 */
+        .hero-wrapper {
+            position: relative;
+            z-index: 10;
+            width: 100vw;
+            height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            background-color: #0b0d15;
-            font-family: 'Segoe UI', 'PingFang SC', Roboto, 'Helvetica Neue', sans-serif;
+            pointer-events: none;        /* 让点击事件穿透，不干扰 canvas (但文字本身不可点) */
             padding: 1.5rem;
-            margin: 0;
         }
 
         .hero-text {
             text-align: center;
-            padding: 2rem 1.5rem;
-            border-radius: 3rem;
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(2px);
-            box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.6);
-            transition: transform 0.25s ease;
+            padding: 2rem 2.5rem;
+            border-radius: 3.5rem;
+            background: rgba(10, 14, 23, 0.55);        /* 半透明玻璃效果，让文字在代码雨中清晰可读 */
+            backdrop-filter: blur(6px) saturate(180%);
+            -webkit-backdrop-filter: blur(6px) saturate(180%);
+            box-shadow: 0 30px 60px -16px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(0, 255, 100, 0.08);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            pointer-events: auto;        /* 恢复鼠标事件，但只是视觉，无交互需求 */
             max-width: 90vw;
+            border: 1px solid rgba(0, 255, 100, 0.08);
         }
 
         .hero-text:hover {
             transform: scale(1.02);
+            box-shadow: 0 40px 80px -12px rgba(0, 255, 100, 0.15), 0 0 0 1px rgba(0, 255, 100, 0.15);
         }
 
+        /* 核心彩色文字 ———— 流动渐变 + 发光 */
         .colorful-title {
-            font-size: clamp(2.8rem, 15vw, 6rem);
+            font-size: clamp(2.8rem, 14vw, 6.2rem);
             font-weight: 800;
             letter-spacing: 0.04em;
             line-height: 1.2;
@@ -55,9 +83,9 @@
             background-clip: text;
             color: transparent;
             text-shadow: 
-                0 0 12px rgba(255, 215, 100, 0.2),
-                0 0 30px rgba(180, 100, 255, 0.15),
-                0 8px 24px rgba(0, 0, 0, 0.3);
+                0 0 18px rgba(255, 215, 100, 0.25),
+                0 0 40px rgba(140, 80, 255, 0.15),
+                0 8px 30px rgba(0, 0, 0, 0.5);
             animation: gradientShift 8s ease-in-out infinite alternate;
             word-break: break-word;
         }
@@ -74,22 +102,24 @@
             }
         }
 
+        /* 底部小装饰 ———— 和代码雨呼应 */
         .sub-message {
             margin-top: 1.8rem;
-            font-size: clamp(1rem, 2.5vw, 1.4rem);
-            color: rgba(255, 255, 255, 0.25);
-            letter-spacing: 0.3em;
+            font-size: clamp(0.9rem, 2.2vw, 1.3rem);
+            color: rgba(0, 255, 120, 0.4);
+            letter-spacing: 0.25em;
             font-weight: 300;
             text-transform: uppercase;
-            border-top: 1px solid rgba(255, 255, 255, 0.06);
-            padding-top: 1.8rem;
+            border-top: 1px solid rgba(0, 255, 100, 0.08);
+            padding-top: 1.6rem;
             display: inline-block;
-            backdrop-filter: blur(4px);
+            backdrop-filter: blur(2px);
+            text-shadow: 0 0 12px rgba(0, 255, 100, 0.2);
         }
 
         .sub-message span {
             display: inline-block;
-            animation: fadePulse 4s ease-in-out infinite;
+            animation: fadePulse 4.5s ease-in-out infinite;
         }
 
         @keyframes fadePulse {
@@ -97,25 +127,166 @@
             50% { opacity: 0.9; }
         }
 
+        /* 移动端适配 */
         @media (max-width: 480px) {
             .hero-text {
-                padding: 1.5rem 1rem;
-                border-radius: 2rem;
+                padding: 1.5rem 1.2rem;
+                border-radius: 2.2rem;
+                background: rgba(10, 14, 23, 0.6);
             }
             .sub-message {
-                letter-spacing: 0.15em;
+                letter-spacing: 0.1em;
             }
         }
     </style>
 </head>
 <body>
-    <div class="hero-text">
-        <!-- 主标题：彩色字，正中间 -->
-        <h1 class="colorful-title">这里暂时什么都没有</h1>
-        <!-- 附加一条细微的装饰文字 (完全是可选的，但让页面更生动) -->
-        <div class="sub-message">
-            <span>✦  你是给！ ✦</span>
+
+    <!-- 画布：绿色代码雨背景 -->
+    <canvas id="matrixCanvas"></canvas>
+
+    <!-- 内容层：彩色文字居中 -->
+    <div class="hero-wrapper">
+        <div class="hero-text">
+            <h1 class="colorful-title">这里暂时什么都没有</h1>
+            <div class="sub-message">
+                <span>✦ 代码雨 · 静待绽放 ✦</span>
+            </div>
         </div>
     </div>
+
+    <script>
+        (function() {
+            const canvas = document.getElementById('matrixCanvas');
+            const ctx = canvas.getContext('2d');
+
+            // ----- 尺寸自适应 -----
+            let width = window.innerWidth;
+            let height = window.innerHeight;
+            canvas.width = width;
+            canvas.height = height;
+
+            // ----- 代码雨参数 -----
+            const columnWidth = 18;              // 每个字符的宽度 (像素)
+            const fontSize = 20;                 // 字体大小
+            const columns = Math.floor(width / columnWidth);
+            // drops 数组: 每个元素代表当前列的 y 坐标 (从0开始)
+            const drops = [];
+
+            // 初始化 drops: 每个列随机起始位置 (让雨滴错落)
+            for (let i = 0; i < columns; i++) {
+                drops[i] = Math.floor(Math.random() * -height);  // 负值表示从屏幕外开始
+            }
+
+            // ----- 字符集 (经典绿色代码雨风格: 数字 + 片假名/字母) -----
+            const chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzアァカサタナハマヤャラワガザダバパイィキシチニヒミリヰギジヂビピウゥクスツヌフムユュルグズヅブプエェケセテネヘメレヱゲゼデベペオォコソトノホモヨョロヲゴゾドボポヴッン";
+            const charArray = chars.split('');
+
+            // 获取随机字符
+            function getRandomChar() {
+                return charArray[Math.floor(Math.random() * charArray.length)];
+            }
+
+            // ----- 绘图函数 (绿色系) -----
+            function draw() {
+                // 半透明黑色叠加层 ———— 产生拖尾余晖效果
+                ctx.fillStyle = 'rgba(10, 13, 23, 0.06)';
+                ctx.fillRect(0, 0, width, height);
+
+                // 设置字体样式
+                ctx.font = fontSize + 'px "Courier New", monospace';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'top';
+
+                // 遍历每一列
+                for (let i = 0; i < drops.length; i++) {
+                    // 每一列的 x 坐标
+                    const x = i * columnWidth + columnWidth / 2;
+                    // 当前列的 y 坐标
+                    let y = drops[i];
+
+                    // 随机选取字符
+                    const char = getRandomChar();
+
+                    // ---- 亮度/颜色：根据 y 位置渐变，让雨滴有层次 ----
+                    // 越靠下的字符越亮 (模拟光晕)
+                    const brightness = Math.min(1, (y + height) / (height * 1.2));
+                    // 基础绿色: 从深绿 (0,80,0) 到 亮绿 (0,255,80) 再到 青绿 (0,255,150)
+                    const green = Math.floor(80 + 175 * brightness);
+                    const red = Math.floor(10 + 40 * brightness);
+                    const blue = Math.floor(20 + 80 * brightness);
+                    ctx.fillStyle = `rgb(${red}, ${green}, ${blue})`;
+
+                    // 偶尔让最亮的字符带一点白色高光 (增加闪烁感)
+                    if (y > height - 30 && Math.random() < 0.15) {
+                        ctx.fillStyle = `rgba(180, 255, 200, 0.95)`;
+                    }
+
+                    // 绘制字符
+                    ctx.fillText(char, x, y);
+
+                    // ---- 更新坐标 ----
+                    // 下落速度: 基础速度 + 随机偏移 (让雨滴错落有致)
+                    const speed = 0.8 + Math.random() * 0.7;
+                    drops[i] = y + speed;
+
+                    // 重置条件: 当超出底部时，重置到顶部，并且随机偏移列 (让雨滴永不停止)
+                    if (drops[i] > height) {
+                        drops[i] = -Math.random() * height * 0.8 - 20;
+                        // 可选的: 重置时随机改变列字符密度 (通过重置y让雨滴重新开始)
+                    }
+                }
+
+                // 额外: 绘制一道微弱的光晕线 (增强氛围)
+                // 但保持简洁，不干扰文字阅读
+            }
+
+            // ----- 循环动画 -----
+            let animationId = null;
+            function animate() {
+                draw();
+                animationId = requestAnimationFrame(animate);
+            }
+
+            animate();
+
+            // ----- 窗口大小自适应 (防抖) -----
+            let resizeTimeout = null;
+            function handleResize() {
+                clearTimeout(resizeTimeout);
+                resizeTimeout = setTimeout(() => {
+                    width = window.innerWidth;
+                    height = window.innerHeight;
+                    canvas.width = width;
+                    canvas.height = height;
+
+                    // 重新计算列数
+                    const newColumns = Math.floor(width / columnWidth);
+                    // 调整 drops 数组长度
+                    if (newColumns > drops.length) {
+                        // 新增列: 随机初始化 y
+                        for (let i = drops.length; i < newColumns; i++) {
+                            drops[i] = Math.floor(Math.random() * -height);
+                        }
+                    } else if (newColumns < drops.length) {
+                        // 减少列: 截断数组
+                        drops.length = newColumns;
+                    }
+                    // 如果宽度变化，但列数未变，drops 保持不变，雨滴继续下落
+                }, 120);
+            }
+
+            window.addEventListener('resize', handleResize);
+
+            // 清理动画 (虽然不是必须，但是好习惯)
+            window.addEventListener('beforeunload', function() {
+                if (animationId) {
+                    cancelAnimationFrame(animationId);
+                }
+                window.removeEventListener('resize', handleResize);
+            });
+
+        })();
+    </script>
 </body>
 </html>
