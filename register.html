@@ -4,10 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>注册 · 代码雨</title>
-    <!-- Favicon 与主页保持一致 -->
-    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌈</text></svg>">
     <style>
-        /* 全局重置 + 全屏 canvas */
         * {
             margin: 0;
             padding: 0;
@@ -33,7 +31,6 @@
             background: #0b0d15;
         }
 
-        /* ===== 返回首页链接（左上角） ===== */
         .back-home {
             position: fixed;
             top: 24px;
@@ -59,7 +56,6 @@
             transform: translateX(-4px);
         }
 
-        /* ===== 注册表单容器 ===== */
         .register-wrapper {
             position: relative;
             z-index: 10;
@@ -113,7 +109,6 @@
             padding-bottom: 1.2rem;
         }
 
-        /* 表单组 */
         .form-group {
             margin-bottom: 1.4rem;
         }
@@ -152,11 +147,6 @@
             box-shadow: 0 0 30px rgba(0, 255, 120, 0.03), inset 0 0 20px rgba(0, 255, 120, 0.02);
         }
 
-        .form-group input:focus-visible {
-            outline: none;
-        }
-
-        /* 注册按钮 */
         .btn-register-submit {
             width: 100%;
             padding: 14px;
@@ -186,7 +176,6 @@
             transform: translateY(0px) scale(0.97);
         }
 
-        /* 已有账号跳转 */
         .login-link {
             text-align: center;
             margin-top: 1.5rem;
@@ -206,7 +195,42 @@
             text-decoration: underline;
         }
 
-        /* ===== 响应式 ===== */
+        .toast {
+            position: fixed;
+            top: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 999;
+            padding: 12px 30px;
+            border-radius: 60px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            opacity: 0;
+            transition: opacity 0.5s ease, transform 0.5s ease;
+            pointer-events: none;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .toast.success {
+            background: rgba(0, 255, 120, 0.15);
+            border: 1px solid rgba(0, 255, 120, 0.25);
+            color: #8affc0;
+            box-shadow: 0 8px 30px rgba(0, 255, 120, 0.08);
+        }
+
+        .toast.error {
+            background: rgba(255, 80, 80, 0.15);
+            border: 1px solid rgba(255, 80, 80, 0.25);
+            color: #ff8a8a;
+            box-shadow: 0 8px 30px rgba(255, 80, 80, 0.08);
+        }
+
         @media (max-width: 480px) {
             .back-home {
                 top: 16px;
@@ -214,79 +238,59 @@
                 font-size: 0.75rem;
                 padding: 6px 14px;
             }
-
             .register-card {
                 padding: 2rem 1.5rem 1.8rem;
                 border-radius: 2rem;
             }
-
             .register-title {
                 font-size: 1.6rem;
             }
-
             .form-group input {
                 padding: 10px 16px;
                 font-size: 0.9rem;
             }
-
             .btn-register-submit {
                 padding: 12px;
                 font-size: 0.95rem;
-            }
-        }
-
-        @media (max-width: 380px) {
-            .register-card {
-                padding: 1.5rem 1rem 1.5rem;
-                border-radius: 1.5rem;
-            }
-
-            .register-title {
-                font-size: 1.3rem;
             }
         }
     </style>
 </head>
 <body>
 
-    <!-- ===== 左上角返回首页 ===== -->
     <a href="/" class="back-home">← 返回首页</a>
 
-    <!-- Canvas 代码雨背景 -->
     <canvas id="matrixCanvas"></canvas>
 
-    <!-- ===== 注册表单 ===== -->
+    <!-- Toast 提示 -->
+    <div id="toast" class="toast"></div>
+
     <div class="register-wrapper">
         <div class="register-card">
             <h1 class="register-title">📝 注册</h1>
             <p class="register-subtitle">创建你的专属账号</p>
 
-            <form id="registerForm" action="/reg" method="GET">
-                <!-- 用户名 -->
+            <form id="registerForm">
                 <div class="form-group">
                     <label for="username">用户名</label>
                     <input type="text" id="username" name="username" placeholder="输入用户名" required autocomplete="username">
                 </div>
 
-                <!-- 邮箱 -->
                 <div class="form-group">
                     <label for="email">邮箱</label>
                     <input type="email" id="email" name="email" placeholder="输入邮箱地址" required autocomplete="email">
                 </div>
 
-                <!-- 密码 -->
                 <div class="form-group">
                     <label for="password">密码</label>
                     <input type="password" id="password" name="password" placeholder="至少 6 位" required minlength="6" autocomplete="new-password">
                 </div>
 
-                <!-- 确认密码 -->
                 <div class="form-group">
                     <label for="confirmPassword">确认密码</label>
                     <input type="password" id="confirmPassword" name="confirmPassword" placeholder="再次输入密码" required minlength="6" autocomplete="new-password">
                 </div>
 
-                <!-- 提交按钮 -->
                 <button type="submit" class="btn-register-submit">注 册</button>
             </form>
 
@@ -296,8 +300,8 @@
         </div>
     </div>
 
-    <!-- ===== 代码雨脚本 ===== -->
     <script>
+        // ===== 代码雨背景（与主页一致） =====
         (function() {
             const canvas = document.getElementById('matrixCanvas');
             const ctx = canvas.getContext('2d');
@@ -308,7 +312,6 @@
             canvas.height = height;
 
             const trailLength = 0.04;
-
             const columnWidth = 18;
             const fontSize = 20;
             const columns = Math.floor(width / columnWidth);
@@ -402,24 +405,93 @@
                 }
                 window.removeEventListener('resize', handleResize);
             });
-
-            // ===== 表单验证：密码一致 =====
-            const form = document.getElementById('registerForm');
-            const password = document.getElementById('password');
-            const confirmPassword = document.getElementById('confirmPassword');
-
-            form.addEventListener('submit', function(e) {
-                if (password.value !== confirmPassword.value) {
-                    e.preventDefault();
-                    alert('⚠️ 两次输入的密码不一致，请重新输入。');
-                    confirmPassword.focus();
-                    confirmPassword.select();
-                }
-                // 如果一致，表单正常提交，跳转到 /reg?username=xxx&email=xxx&password=xxx
-                // 注意：密码会以明文出现在URL中（GET请求），仅供演示。
-                // 生产环境请务必使用 POST + HTTPS。
-            });
         })();
+
+        // ===== 用户注册逻辑（存储到 localStorage） =====
+        const form = document.getElementById('registerForm');
+        const toast = document.getElementById('toast');
+
+        function showToast(message, type = 'success') {
+            toast.textContent = message;
+            toast.className = `toast ${type}`;
+            // 触发重排以重启动画
+            void toast.offsetWidth;
+            toast.classList.add('show');
+            clearTimeout(toast._hideTimer);
+            toast._hideTimer = setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const username = document.getElementById('username').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+
+            // 1. 验证密码一致性
+            if (password !== confirmPassword) {
+                showToast('⚠️ 两次输入的密码不一致', 'error');
+                document.getElementById('confirmPassword').focus();
+                document.getElementById('confirmPassword').select();
+                return;
+            }
+
+            // 2. 验证密码长度
+            if (password.length < 6) {
+                showToast('⚠️ 密码至少需要 6 位', 'error');
+                document.getElementById('password').focus();
+                document.getElementById('password').select();
+                return;
+            }
+
+            // 3. 验证用户名是否已存在
+            const users = JSON.parse(localStorage.getItem('users') || '[]');
+            const existingUser = users.find(u => u.username === username);
+            if (existingUser) {
+                showToast('❌ 用户名已被占用，请换一个', 'error');
+                document.getElementById('username').focus();
+                document.getElementById('username').select();
+                return;
+            }
+
+            // 4. 验证邮箱是否已被注册
+            const existingEmail = users.find(u => u.email === email);
+            if (existingEmail) {
+                showToast('❌ 该邮箱已被注册', 'error');
+                document.getElementById('email').focus();
+                document.getElementById('email').select();
+                return;
+            }
+
+            // 5. 保存用户信息
+            const newUser = {
+                id: Date.now().toString(36) + Math.random().toString(36).substr(2, 4),
+                username: username,
+                email: email,
+                password: password, // ⚠️ 明文存储仅供演示，生产环境必须加密
+                createdAt: new Date().toISOString()
+            };
+
+            users.push(newUser);
+            localStorage.setItem('users', JSON.stringify(users));
+
+            // 6. 自动登录：保存当前登录状态
+            localStorage.setItem('currentUser', JSON.stringify({
+                id: newUser.id,
+                username: newUser.username,
+                email: newUser.email
+            }));
+
+            showToast('✅ 注册成功！正在跳转...', 'success');
+
+            // 7. 延迟跳转到用户中心
+            setTimeout(() => {
+                window.location.href = '/dashboard.html';
+            }, 1200);
+        });
     </script>
 </body>
 </html>
