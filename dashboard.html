@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>用户中心 · 代码雨</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌈</text></svg>">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #0b0d15;
+            overflow: hidden;
+            font-family: 'Segoe UI', 'PingFang SC', Roboto, 'Helvetica Neue', sans-serif;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        #matrixCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 0;
+            display: block;
+            background: #0b0d15;
+        }
+
+        .dashboard-wrapper {
+            position: relative;
+            z-index: 10;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            pointer-events: none;
+            padding: 1.5rem;
+        }
+
+        .dashboard-card {
+            pointer-events: auto;
+            width: 100%;
+            max-width: 480px;
+            padding: 2.8rem 2.5rem 2.5rem;
+            border-radius: 3rem;
+            background: rgba(10, 14, 23, 0.65);
+            backdrop-filter: blur(12px) saturate(180%);
+            -webkit-backdrop-filter: blur(12px) saturate(180%);
+            box-shadow: 0 40px 80px -20px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(0, 255, 100, 0.06);
+            border: 1px solid rgba(0, 255, 100, 0.05);
+            text-align: center;
+        }
+
+        .avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #f9d976, #bb7bdb, #6fc3df);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #0b0d15;
+            margin: 0 auto 1.2rem;
+            box-shadow: 0 8px 30px rgba(0, 255, 120, 0.08);
+        }
+
+        .dashboard-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: rgba(255, 255, 255, 0.85);
+            margin-bottom: 0.3rem;
+        }
+
+        .dashboard-email {
+            color: rgba(255, 255, 255, 0.3);
+            font-size: 0.9rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .user-info {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 1.5rem;
+            padding: 1.2rem 1.5rem;
+            text-align: left;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            margin-bottom: 1.8rem;
+        }
+
+        .user-info-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.9rem;
+        }
+
+        .user-info-item:last-child {
+            border-bottom: none;
+        }
+
+        .user-info-item .label {
+            color: rgba(255, 255, 255, 0.25);
+            font-weight: 300;
+        }
+
+        .user-info-item .value {
+            color: rgba(255, 255, 255, 0.7);
+            font-weight: 500;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .btn-dashboard {
+            padding: 10px 28px;
+            border-radius: 60px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            background: rgba(255, 255, 255, 0.04);
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-dashboard:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.12);
+            color: rgba(255, 255, 255, 0.85);
+            transform: translateY(-2px);
+        }
+
+        .btn-dashboard.primary {
+            background: linear-gradient(135deg, rgba(0, 255, 120, 0.12), rgba(100, 180, 255, 0.10));
+            border-color: rgba(0, 255, 120, 0.15);
+            color: rgba(0, 255, 150, 0.8);
+        }
+
+        .btn-dashboard.primary:hover {
+            background: linear-gradient(135deg, rgba(0, 255, 120, 0.20), rgba(100, 180, 255, 0.18));
+            border-color: rgba(0, 255, 120, 0.25);
+            color: #8affc0;
+        }
+
+        .btn-dashboard.danger {
+            border-color: rgba(255, 80, 80, 0.12);
+            color: rgba(255, 80, 80, 0.6);
+        }
+
+        .btn-dashboard.danger:hover {
+            background: rgba(255, 80, 80, 0.08);
+            border-color: rgba(255, 80, 80, 0.20);
+            color: #ff8a8a;
+        }
+
+        .toast {
+            position: fixed;
+            top: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 999;
+            padding: 12px 30px;
+            border-radius: 60px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            opacity: 0;
+            transition: opacity 0.5s ease, transform 0.5s ease;
+            pointer-events: none;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .toast.success {
+            background: rgba(0, 255, 120, 0.15);
+            border: 1px solid rgba(0, 255, 120, 0.25);
+            color: #8affc0;
+            box-shadow: 0 8px 30px rgba(0, 255, 120, 0.08);
+        }
+
+        .toast.error {
+            background: rgba(255, 80, 80, 0.15);
+            border: 1px solid rgba(255, 80, 80, 0.25);
+            color: #ff8a8a;
+            box-shadow: 0 8px 30px rgba(255, 80, 80, 0.08);
+        }
+
+        @media (max-width: 480px) {
+            .dashboard-card {
+                padding: 2rem 1.5rem 1.8rem;
+                border-radius: 2rem;
+            }
+            .dashboard-title {
+                font-size: 1.4rem;
+            }
+            .avatar {
+                width: 60px;
+                height: 60px;
+                font-size: 2rem;
+            }
+            .btn-group {
+                flex-direction: column;
+                align-items: stretch;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="matrixCanvas"></canvas>
+
+    <div id="toast" class="toast"></div>
+
+    <div class="dashboard-wrapper">
+        <div class="dashboard-card" id="dashboardCard">
+            <!-- 由 JS 动态渲染 -->
+        </div>
+    </div>
+
+    <script>
+        // ===== 代码雨背景 =====
+        (function() {
+            const canvas = document.getElementById('matrixCanvas');
+            const ctx = canvas.getContext('2d');
+
+            let width = window.innerWidth;
+            let height = window.innerHeight;
+            canvas.width = width;
+            canvas.height = height;
+
+            const trailLength = 0.04;
+            const columnWidth = 18;
+            const fontSize = 20;
+            const columns = Math.floor(width / columnWidth);
+            const drops = [];
+
+            for (let i = 0; i < columns; i++) {
+                drops[i] = -Math.random() * height * 1.5 - 20;
+            }
+
+            const chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzアァカサタナハマヤャラワガザダバパイィキシチニヒミリヰギジヂビピウゥクスツヌフムユュルグズヅブプエェケセテネヘメレヱゲゼデベペオォコソトノホモヨョロヲゴゾドボポヴッン";
+            const charArray = chars.split('');
+
+            function getRandomChar() {
+                return charArray[Math.floor(Math.random() * charArray.length)];
+            }
+
+            function draw() {
+                ctx.fillStyle = `rgba(10, 13, 23, ${trailLength})`;
+                ctx.fillRect(0, 0, width, height);
+
+                ctx.font = fontSize + 'px "Courier New", monospace';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'top';
+
+                for (let i = 0; i < drops.length; i++) {
+                    const x = i * columnWidth + columnWidth / 2;
+                    let y = drops[i];
+                    const char = getRandomChar();
+
+                    let brightness = 0;
+                    if (y > 0) {
+                        brightness = Math.min(1, y / (height * 0.9));
+                    }
+                    brightness = Math.max(0.3, brightness);
+
+                    const green = Math.floor(80 + 175 * brightness);
+                    const red = Math.floor(10 + 40 * brightness);
+                    const blue = Math.floor(20 + 80 * brightness);
+                    ctx.fillStyle = `rgb(${red}, ${green}, ${blue})`;
+
+                    if (y > height * 0.6 && Math.random() < 0.08) {
+                        ctx.fillStyle = `rgba(200, 255, 220, 0.9)`;
+                    }
+
+                    if (y > 0) {
+                        ctx.fillText(char, x, y);
+                    }
+
+                    const speed = 0.8 + Math.random() * 0.7;
+                    drops[i] = y + speed;
+
+                    if (drops[i] > height) {
+                        drops[i] = -Math.random() * height * 0.6 - 30;
+                    }
+                }
+            }
+
+            let animationId = null;
+
+            function animate() {
+                draw();
+                animationId = requestAnimationFrame(animate);
+            }
+            animate();
+
+            let resizeTimeout = null;
+
+            function handleResize() {
+                clearTimeout(resizeTimeout);
+                resizeTimeout = setTimeout(() => {
+                    width = window.innerWidth;
+                    height = window.innerHeight;
+                    canvas.width = width;
+                    canvas.height = height;
+
+                    const newColumns = Math.floor(width / columnWidth);
+                    if (newColumns > drops.length) {
+                        for (let i = drops.length; i < newColumns; i++) {
+                            drops[i] = -Math.random() * height * 1.5 - 20;
+                        }
+                    } else if (newColumns < drops.length) {
+                        drops.length = newColumns;
+                    }
+                }, 120);
+            }
+            window.addEventListener('resize', handleResize);
+
+            window.addEventListener('beforeunload', function() {
+                if (animationId) {
+                    cancelAnimationFrame(animationId);
+                }
+                window.removeEventListener('resize', handleResize);
+            });
+        })();
+
+        // ===== 用户中心逻辑 =====
+        const container = document.getElementById('dashboardCard');
+        const toast = document.getElementById('toast');
+
+        function showToast(message, type = 'success') {
+            toast.textContent = message;
+            toast.className = `toast ${type}`;
+            void toast.offsetWidth;
+            toast.classList.add('show');
+            clearTimeout(toast._hideTimer);
+            toast._hideTimer = setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        function renderDashboard(user) {
+            const initial = user.username.charAt(0).toUpperCase();
+
+            container.innerHTML = `
+                <div class="avatar">${initial}</div>
+                <h1 class="dashboard-title">👋 欢迎，${user.username}</h1>
+                <p class="dashboard-email">${user.email}</p>
+
+                <div class="user-info">
+                    <div class="user-info-item">
+                        <span class="label">用户 ID</span>
+                        <span class="value">${user.id}</span>
+                    </div>
+                    <div class="user-info-item">
+                        <span class="label">用户名</span>
+                        <span class="value">${user.username}</span>
+                    </div>
+                    <div class="user-info-item">
+                        <span class="label">邮箱</span>
+                        <span class="value">${user.email}</span>
+                    </div>
+                </div>
+
+                <div class="btn-group">
+                    <a href="/" class="btn-dashboard">🏠 返回首页</a>
+                    <button id="logoutBtn" class="btn-dashboard danger">🚪 退出登录</button>
+                </div>
+            `;
+
+            // 退出登录
+            document.getElementById('logoutBtn').addEventListener('click', function() {
+                localStorage.removeItem('currentUser');
+                showToast('已退出登录', 'success');
+                setTimeout(() => {
+                    window.location.href = '/';
+                }, 800);
+            });
+        }
+
+        // ===== 检查登录状态 =====
+        (function checkAuth() {
+            const currentUserStr = localStorage.getItem('currentUser');
+            if (!currentUserStr) {
+                // 未登录，跳转到首页
+                window.location.href = '/';
+                return;
+            }
+
+            try {
+                const user = JSON.parse(currentUserStr);
+                renderDashboard(user);
+            } catch (e) {
+                localStorage.removeItem('currentUser');
+                window.location.href = '/';
+            }
+        })();
+    </script>
+</body>
+</html>
