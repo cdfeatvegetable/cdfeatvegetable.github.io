@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>彩色占位页</title>
+    <style>
+        /* 清除内外边距，让页面铺满视口 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #0b0d15; /* 深色背景让彩色更突出 */
+            font-family: 'Segoe UI', 'PingFang SC', Roboto, 'Helvetica Neue', sans-serif;
+            padding: 1.5rem;
+            margin: 0;
+        }
+
+        /* 核心文字容器 ———— 完美的居中 */
+        .hero-text {
+            text-align: center;
+            padding: 2rem 1.5rem;
+            border-radius: 3rem;
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(2px);
+            box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.6);
+            transition: transform 0.25s ease;
+            max-width: 90vw;
+        }
+
+        .hero-text:hover {
+            transform: scale(1.02);
+        }
+
+        /* 核心彩色文字 ———— 动态渐变 + 额外文字阴影提升质感 */
+        .colorful-title {
+            font-size: clamp(2.8rem, 15vw, 6rem);
+            font-weight: 800;
+            letter-spacing: 0.04em;
+            line-height: 1.2;
+            background: linear-gradient(135deg, 
+                #f9d976, 
+                #f39b7b, 
+                #bb7bdb, 
+                #6fc3df, 
+                #8ed6b0,
+                #f9d976
+            );
+            background-size: 300% 300%;
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 
+                0 0 12px rgba(255, 215, 100, 0.2),
+                0 0 30px rgba(180, 100, 255, 0.15),
+                0 8px 24px rgba(0, 0, 0, 0.3);
+            animation: gradientShift 8s ease-in-out infinite alternate;
+            word-break: break-word;
+        }
+
+        /* 彩色流动动画 */
+        @keyframes gradientShift {
+            0% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        /* 可选小点缀 ———— 增加一点俏皮的装饰线，让页面不空旷 */
+        .sub-message {
+            margin-top: 1.8rem;
+            font-size: clamp(1rem, 2.5vw, 1.4rem);
+            color: rgba(255, 255, 255, 0.25);
+            letter-spacing: 0.3em;
+            font-weight: 300;
+            text-transform: uppercase;
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+            padding-top: 1.8rem;
+            display: inline-block;
+            backdrop-filter: blur(4px);
+        }
+
+        .sub-message span {
+            display: inline-block;
+            animation: fadePulse 4s ease-in-out infinite;
+        }
+
+        @keyframes fadePulse {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.9; }
+        }
+
+        /* 移动端更舒适的边距 */
+        @media (max-width: 480px) {
+            .hero-text {
+                padding: 1.5rem 1rem;
+                border-radius: 2rem;
+            }
+            .sub-message {
+                letter-spacing: 0.15em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="hero-text">
+        <!-- 主标题：彩色字，正中间 -->
+        <h1 class="colorful-title">这里暂时什么都没有</h1>
+        <!-- 附加一条细微的装饰文字 (完全是可选的，但让页面更生动) -->
+        <div class="sub-message">
+            <span>✦ 稍后回来 · 精彩准备中 ✦</span>
+        </div>
+    </div>
+</body>
+</html>
