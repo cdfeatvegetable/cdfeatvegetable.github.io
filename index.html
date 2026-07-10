@@ -2,11 +2,11 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="description" content="这是我的个人没用网站，用来分享和展示我的项目，敬请期待更多内容。">
-    <link rel="canonical" href="https://maize.j3.ink/">
-    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>404 Not Found</title>
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
     <style>
+        /* 全局重置 + 全屏 canvas */
         * {
             margin: 0;
             padding: 0;
@@ -32,6 +32,77 @@
             background: #0b0d15;
         }
 
+        /* ===== 右上角登录/注册按钮 ===== */
+        .auth-bar {
+            position: fixed;
+            top: 24px;
+            right: 32px;
+            z-index: 20;
+            display: flex;
+            gap: 14px;
+            align-items: center;
+            pointer-events: auto;
+        }
+
+        .auth-btn {
+            padding: 8px 22px;
+            border-radius: 40px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.06);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.10);
+            color: rgba(255, 255, 255, 0.80);
+            box-shadow: 0 8px 20px -8px rgba(0, 0, 0, 0.5);
+        }
+
+        .auth-btn:hover {
+            transform: translateY(-2px) scale(1.02);
+            background: rgba(255, 255, 255, 0.14);
+            border-color: rgba(255, 255, 255, 0.25);
+            color: #ffffff;
+            box-shadow: 0 12px 28px -8px rgba(0, 0, 0, 0.7);
+        }
+
+        .auth-btn:active {
+            transform: translateY(0px) scale(0.97);
+        }
+
+        /* 登录按钮 - 强调色 (绿色调，与代码雨呼应) */
+        .btn-login {
+            background: rgba(0, 255, 120, 0.10);
+            border-color: rgba(0, 255, 120, 0.20);
+            color: rgba(0, 255, 150, 0.90);
+        }
+
+        .btn-login:hover {
+            background: rgba(0, 255, 120, 0.20);
+            border-color: rgba(0, 255, 120, 0.40);
+            color: #8affc0;
+            box-shadow: 0 0 30px rgba(0, 255, 120, 0.10);
+        }
+
+        /* 注册按钮 - 强调色 (紫色调，与彩色文字呼应) */
+        .btn-register {
+            background: rgba(180, 120, 255, 0.10);
+            border-color: rgba(180, 120, 255, 0.20);
+            color: rgba(200, 170, 255, 0.90);
+        }
+
+        .btn-register:hover {
+            background: rgba(180, 120, 255, 0.20);
+            border-color: rgba(180, 120, 255, 0.40);
+            color: #d4bfff;
+            box-shadow: 0 0 30px rgba(180, 120, 255, 0.10);
+        }
+
+        /* ===== 内容层 ===== */
         .hero-wrapper {
             position: relative;
             z-index: 10;
@@ -128,7 +199,20 @@
             }
         }
 
+        /* ===== 移动端适配 ===== */
         @media (max-width: 480px) {
+            .auth-bar {
+                top: 16px;
+                right: 16px;
+                gap: 10px;
+            }
+
+            .auth-btn {
+                padding: 6px 16px;
+                font-size: 0.8rem;
+                border-radius: 30px;
+            }
+
             .hero-text {
                 padding: 1.5rem 1.2rem;
                 border-radius: 2.2rem;
@@ -138,12 +222,34 @@
                 letter-spacing: 0.1em;
             }
         }
+
+        @media (max-width: 380px) {
+            .auth-bar {
+                top: 12px;
+                right: 12px;
+                gap: 8px;
+                flex-wrap: wrap;
+                justify-content: flex-end;
+            }
+            .auth-btn {
+                padding: 5px 12px;
+                font-size: 0.7rem;
+            }
+        }
     </style>
 </head>
 <body>
 
+    <!-- ===== 右上角登录 / 注册 ===== -->
+    <div class="auth-bar">
+        <a href="/login.html" class="auth-btn btn-login">登录</a>
+        <a href="/register.html" class="auth-btn btn-register">注册</a>
+    </div>
+
+    <!-- Canvas 代码雨背景 -->
     <canvas id="matrixCanvas"></canvas>
 
+    <!-- 内容层 -->
     <div class="hero-wrapper">
         <div class="hero-text">
             <h1 class="colorful-title">这里暂时什么都没有</h1>
@@ -163,9 +269,7 @@
             canvas.width = width;
             canvas.height = height;
 
-            // ===== 核心参数：尾烟长度 =====
-            // 数值越小，拖尾越短（雨滴越干净利落）；数值越大，拖尾越长。
-            // 推荐范围：0.01 ~ 0.20
+            // ===== 尾烟长度 =====
             const trailLength = 0.04;
 
             // ----- 代码雨参数 -----
@@ -174,10 +278,8 @@
             const columns = Math.floor(width / columnWidth);
             const drops = [];
 
-            // 【关键修改】所有雨滴初始位置都从屏幕外顶部开始 (负值)
-            // 这样它们进入视野时已经是“明亮”状态，不会产生暗色拖尾
+            // 所有雨滴从屏幕外顶部开始
             for (let i = 0; i < columns; i++) {
-                // 随机分布在 -height 到 0 之间，让它们错落进入视野
                 drops[i] = -Math.random() * height * 1.5 - 20;
             }
 
@@ -188,9 +290,8 @@
                 return charArray[Math.floor(Math.random() * charArray.length)];
             }
 
-            // ----- 绘图函数 -----
+            // ----- 绘图 -----
             function draw() {
-                // 半透明黑色覆盖 —— 控制尾烟长度
                 ctx.fillStyle = `rgba(10, 13, 23, ${trailLength})`;
                 ctx.fillRect(0, 0, width, height);
 
@@ -203,14 +304,10 @@
                     let y = drops[i];
                     const char = getRandomChar();
 
-                    // 【关键修改】亮度计算：基于 y 在屏幕内的位置
-                    // 当 y < 0 (在屏幕外) 时，亮度为0，但因为我们用负值开始，进入屏幕后才绘制
-                    // 为了更平滑，只对 y > 0 的部分进行亮度渐变
                     let brightness = 0;
                     if (y > 0) {
                         brightness = Math.min(1, y / (height * 0.9));
                     }
-                    // 确保最低亮度也有一定可见度
                     brightness = Math.max(0.3, brightness);
 
                     const green = Math.floor(80 + 175 * brightness);
@@ -218,30 +315,24 @@
                     const blue = Math.floor(20 + 80 * brightness);
                     ctx.fillStyle = `rgb(${red}, ${green}, ${blue})`;
 
-                    // 高亮闪烁 (只在屏幕下半部分)
                     if (y > height * 0.6 && Math.random() < 0.08) {
                         ctx.fillStyle = `rgba(200, 255, 220, 0.9)`;
                     }
 
-                    // 只有 y > 0 时才绘制，避免在屏幕外绘制浪费性能
                     if (y > 0) {
                         ctx.fillText(char, x, y);
                     }
 
-                    // 下落速度
                     const speed = 0.8 + Math.random() * 0.7;
                     drops[i] = y + speed;
 
-                    // 重置到顶部（从屏幕外开始）
                     if (drops[i] > height) {
-                        // 【关键修改】重置到屏幕外顶部，而不是从0开始
-                        // 这样雨滴是“新进入”视野的，亮度从低到高渐变
                         drops[i] = -Math.random() * height * 0.6 - 30;
                     }
                 }
             }
 
-            // ----- 动画循环 -----
+            // ----- 动画 -----
             let animationId = null;
 
             function animate() {
@@ -250,7 +341,7 @@
             }
             animate();
 
-            // ----- 窗口自适应 -----
+            // ----- 自适应 -----
             let resizeTimeout = null;
 
             function handleResize() {
@@ -279,8 +370,6 @@
                 }
                 window.removeEventListener('resize', handleResize);
             });
-
-            console.log(`当前尾烟长度 (trailLength) = ${trailLength} (数值越小拖尾越短)`);
         })();
     </script>
 </body>
