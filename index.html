@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>代码雨 · 彩色占位</title>
+    <title>代码雨 · 纯净拖尾</title>
     <style>
-        /* 全局重置 + 全屏 canvas */
         * {
             margin: 0;
             padding: 0;
@@ -14,13 +13,12 @@
 
         body {
             background: #0b0d15;
-            overflow: hidden;          /* 隐藏滚动条，纯全屏背景 */
+            overflow: hidden;
             font-family: 'Segoe UI', 'PingFang SC', Roboto, 'Helvetica Neue', sans-serif;
             height: 100vh;
             width: 100vw;
         }
 
-        /* canvas 作为底层背景 ———— 全屏代码雨 */
         #matrixCanvas {
             position: fixed;
             top: 0;
@@ -29,10 +27,9 @@
             height: 100vh;
             z-index: 0;
             display: block;
-            background: #0b0d15;        /* 深色基底，和代码雨融为一体 */
+            background: #0b0d15;
         }
 
-        /* 内容层 ———— 完美居中，浮在 canvas 之上 */
         .hero-wrapper {
             position: relative;
             z-index: 10;
@@ -41,7 +38,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            pointer-events: none;        /* 让点击事件穿透，不干扰 canvas (但文字本身不可点) */
+            pointer-events: none;
             padding: 1.5rem;
         }
 
@@ -49,12 +46,12 @@
             text-align: center;
             padding: 2rem 2.5rem;
             border-radius: 3.5rem;
-            background: rgba(10, 14, 23, 0.55);        /* 半透明玻璃效果，让文字在代码雨中清晰可读 */
+            background: rgba(10, 14, 23, 0.6);
             backdrop-filter: blur(6px) saturate(180%);
             -webkit-backdrop-filter: blur(6px) saturate(180%);
             box-shadow: 0 30px 60px -16px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(0, 255, 100, 0.08);
             transition: transform 0.3s ease, box-shadow 0.3s ease;
-            pointer-events: auto;        /* 恢复鼠标事件，但只是视觉，无交互需求 */
+            pointer-events: auto;
             max-width: 90vw;
             border: 1px solid rgba(0, 255, 100, 0.08);
         }
@@ -64,25 +61,23 @@
             box-shadow: 0 40px 80px -12px rgba(0, 255, 100, 0.15), 0 0 0 1px rgba(0, 255, 100, 0.15);
         }
 
-        /* 核心彩色文字 ———— 流动渐变 + 发光 */
         .colorful-title {
             font-size: clamp(2.8rem, 14vw, 6.2rem);
             font-weight: 800;
             letter-spacing: 0.04em;
             line-height: 1.2;
-            background: linear-gradient(135deg, 
-                #f9d976, 
-                #f39b7b, 
-                #bb7bdb, 
-                #6fc3df, 
-                #8ed6b0,
-                #f9d976
-            );
+            background: linear-gradient(135deg,
+                    #f9d976,
+                    #f39b7b,
+                    #bb7bdb,
+                    #6fc3df,
+                    #8ed6b0,
+                    #f9d976);
             background-size: 300% 300%;
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
-            text-shadow: 
+            text-shadow:
                 0 0 18px rgba(255, 215, 100, 0.25),
                 0 0 40px rgba(140, 80, 255, 0.15),
                 0 8px 30px rgba(0, 0, 0, 0.5);
@@ -102,7 +97,6 @@
             }
         }
 
-        /* 底部小装饰 ———— 和代码雨呼应 */
         .sub-message {
             margin-top: 1.8rem;
             font-size: clamp(0.9rem, 2.2vw, 1.3rem);
@@ -123,16 +117,20 @@
         }
 
         @keyframes fadePulse {
-            0%, 100% { opacity: 0.3; }
-            50% { opacity: 0.9; }
+            0%,
+            100% {
+                opacity: 0.3;
+            }
+            50% {
+                opacity: 0.9;
+            }
         }
 
-        /* 移动端适配 */
         @media (max-width: 480px) {
             .hero-text {
                 padding: 1.5rem 1.2rem;
                 border-radius: 2.2rem;
-                background: rgba(10, 14, 23, 0.6);
+                background: rgba(10, 14, 23, 0.7);
             }
             .sub-message {
                 letter-spacing: 0.1em;
@@ -142,15 +140,13 @@
 </head>
 <body>
 
-    <!-- 画布：绿色代码雨背景 -->
     <canvas id="matrixCanvas"></canvas>
 
-    <!-- 内容层：彩色文字居中 -->
     <div class="hero-wrapper">
         <div class="hero-text">
             <h1 class="colorful-title">这里暂时什么都没有</h1>
             <div class="sub-message">
-                <span>✦ 代码雨 · 静待绽放 ✦</span>
+                <span>✦ 尾烟可控 · 无暗影残留 ✦</span>
             </div>
         </div>
     </div>
@@ -160,98 +156,101 @@
             const canvas = document.getElementById('matrixCanvas');
             const ctx = canvas.getContext('2d');
 
-            // ----- 尺寸自适应 -----
             let width = window.innerWidth;
             let height = window.innerHeight;
             canvas.width = width;
             canvas.height = height;
 
+            // ===== 核心参数：尾烟长度 =====
+            // 数值越小，拖尾越短（雨滴越干净利落）；数值越大，拖尾越长。
+            // 推荐范围：0.01 ~ 0.20
+            const trailLength = 0.04;
+
             // ----- 代码雨参数 -----
-            const columnWidth = 18;              // 每个字符的宽度 (像素)
-            const fontSize = 20;                 // 字体大小
+            const columnWidth = 18;
+            const fontSize = 20;
             const columns = Math.floor(width / columnWidth);
-            // drops 数组: 每个元素代表当前列的 y 坐标 (从0开始)
             const drops = [];
 
-            // 初始化 drops: 每个列随机起始位置 (让雨滴错落)
+            // 【关键修改】所有雨滴初始位置都从屏幕外顶部开始 (负值)
+            // 这样它们进入视野时已经是“明亮”状态，不会产生暗色拖尾
             for (let i = 0; i < columns; i++) {
-                drops[i] = Math.floor(Math.random() * -height);  // 负值表示从屏幕外开始
+                // 随机分布在 -height 到 0 之间，让它们错落进入视野
+                drops[i] = -Math.random() * height * 1.5 - 20;
             }
 
-            // ----- 字符集 (经典绿色代码雨风格: 数字 + 片假名/字母) -----
             const chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzアァカサタナハマヤャラワガザダバパイィキシチニヒミリヰギジヂビピウゥクスツヌフムユュルグズヅブプエェケセテネヘメレヱゲゼデベペオォコソトノホモヨョロヲゴゾドボポヴッン";
             const charArray = chars.split('');
 
-            // 获取随机字符
             function getRandomChar() {
                 return charArray[Math.floor(Math.random() * charArray.length)];
             }
 
-            // ----- 绘图函数 (绿色系) -----
+            // ----- 绘图函数 -----
             function draw() {
-                // 半透明黑色叠加层 ———— 产生拖尾余晖效果
-                ctx.fillStyle = 'rgba(10, 13, 23, 0.06)';
+                // 半透明黑色覆盖 —— 控制尾烟长度
+                ctx.fillStyle = `rgba(10, 13, 23, ${trailLength})`;
                 ctx.fillRect(0, 0, width, height);
 
-                // 设置字体样式
                 ctx.font = fontSize + 'px "Courier New", monospace';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'top';
 
-                // 遍历每一列
                 for (let i = 0; i < drops.length; i++) {
-                    // 每一列的 x 坐标
                     const x = i * columnWidth + columnWidth / 2;
-                    // 当前列的 y 坐标
                     let y = drops[i];
-
-                    // 随机选取字符
                     const char = getRandomChar();
 
-                    // ---- 亮度/颜色：根据 y 位置渐变，让雨滴有层次 ----
-                    // 越靠下的字符越亮 (模拟光晕)
-                    const brightness = Math.min(1, (y + height) / (height * 1.2));
-                    // 基础绿色: 从深绿 (0,80,0) 到 亮绿 (0,255,80) 再到 青绿 (0,255,150)
+                    // 【关键修改】亮度计算：基于 y 在屏幕内的位置
+                    // 当 y < 0 (在屏幕外) 时，亮度为0，但因为我们用负值开始，进入屏幕后才绘制
+                    // 为了更平滑，只对 y > 0 的部分进行亮度渐变
+                    let brightness = 0;
+                    if (y > 0) {
+                        brightness = Math.min(1, y / (height * 0.9));
+                    }
+                    // 确保最低亮度也有一定可见度
+                    brightness = Math.max(0.3, brightness);
+
                     const green = Math.floor(80 + 175 * brightness);
                     const red = Math.floor(10 + 40 * brightness);
                     const blue = Math.floor(20 + 80 * brightness);
                     ctx.fillStyle = `rgb(${red}, ${green}, ${blue})`;
 
-                    // 偶尔让最亮的字符带一点白色高光 (增加闪烁感)
-                    if (y > height - 30 && Math.random() < 0.15) {
-                        ctx.fillStyle = `rgba(180, 255, 200, 0.95)`;
+                    // 高亮闪烁 (只在屏幕下半部分)
+                    if (y > height * 0.6 && Math.random() < 0.08) {
+                        ctx.fillStyle = `rgba(200, 255, 220, 0.9)`;
                     }
 
-                    // 绘制字符
-                    ctx.fillText(char, x, y);
+                    // 只有 y > 0 时才绘制，避免在屏幕外绘制浪费性能
+                    if (y > 0) {
+                        ctx.fillText(char, x, y);
+                    }
 
-                    // ---- 更新坐标 ----
-                    // 下落速度: 基础速度 + 随机偏移 (让雨滴错落有致)
+                    // 下落速度
                     const speed = 0.8 + Math.random() * 0.7;
                     drops[i] = y + speed;
 
-                    // 重置条件: 当超出底部时，重置到顶部，并且随机偏移列 (让雨滴永不停止)
+                    // 重置到顶部（从屏幕外开始）
                     if (drops[i] > height) {
-                        drops[i] = -Math.random() * height * 0.8 - 20;
-                        // 可选的: 重置时随机改变列字符密度 (通过重置y让雨滴重新开始)
+                        // 【关键修改】重置到屏幕外顶部，而不是从0开始
+                        // 这样雨滴是“新进入”视野的，亮度从低到高渐变
+                        drops[i] = -Math.random() * height * 0.6 - 30;
                     }
                 }
-
-                // 额外: 绘制一道微弱的光晕线 (增强氛围)
-                // 但保持简洁，不干扰文字阅读
             }
 
-            // ----- 循环动画 -----
+            // ----- 动画循环 -----
             let animationId = null;
+
             function animate() {
                 draw();
                 animationId = requestAnimationFrame(animate);
             }
-
             animate();
 
-            // ----- 窗口大小自适应 (防抖) -----
+            // ----- 窗口自适应 -----
             let resizeTimeout = null;
+
             function handleResize() {
                 clearTimeout(resizeTimeout);
                 resizeTimeout = setTimeout(() => {
@@ -260,25 +259,18 @@
                     canvas.width = width;
                     canvas.height = height;
 
-                    // 重新计算列数
                     const newColumns = Math.floor(width / columnWidth);
-                    // 调整 drops 数组长度
                     if (newColumns > drops.length) {
-                        // 新增列: 随机初始化 y
                         for (let i = drops.length; i < newColumns; i++) {
-                            drops[i] = Math.floor(Math.random() * -height);
+                            drops[i] = -Math.random() * height * 1.5 - 20;
                         }
                     } else if (newColumns < drops.length) {
-                        // 减少列: 截断数组
                         drops.length = newColumns;
                     }
-                    // 如果宽度变化，但列数未变，drops 保持不变，雨滴继续下落
                 }, 120);
             }
-
             window.addEventListener('resize', handleResize);
 
-            // 清理动画 (虽然不是必须，但是好习惯)
             window.addEventListener('beforeunload', function() {
                 if (animationId) {
                     cancelAnimationFrame(animationId);
@@ -286,6 +278,7 @@
                 window.removeEventListener('resize', handleResize);
             });
 
+            console.log(`当前尾烟长度 (trailLength) = ${trailLength} (数值越小拖尾越短)`);
         })();
     </script>
 </body>
